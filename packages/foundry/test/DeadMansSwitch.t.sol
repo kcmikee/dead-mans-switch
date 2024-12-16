@@ -234,7 +234,7 @@ contract DeadMansSwitchTest is Test {
         vm.deal(NON_CONTRACT_USER, ONE_THOUSAND);
         vm.startPrank(NON_CONTRACT_USER);
         payable(deadMansSwitch).call{value: ONE_THOUSAND}("");
-        (uint balance, , ) = deadMansSwitch.users(NON_CONTRACT_USER);
+        uint balance = deadMansSwitch.balanceOf(NON_CONTRACT_USER);
         assertEq(balance, ONE_THOUSAND);
     }
 
@@ -242,7 +242,7 @@ contract DeadMansSwitchTest is Test {
         vm.deal(NON_CONTRACT_USER, ONE_THOUSAND);
         vm.startPrank(NON_CONTRACT_USER);
         payable(deadMansSwitch).call{value: ONE_THOUSAND}("0x1234");
-        (uint balance, , ) = deadMansSwitch.users(NON_CONTRACT_USER);
+        uint balance = deadMansSwitch.balanceOf(NON_CONTRACT_USER);
         assertEq(balance, ONE_THOUSAND);
     }
 
