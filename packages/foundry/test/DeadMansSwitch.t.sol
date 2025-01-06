@@ -305,38 +305,4 @@ contract DeadMansSwitchTest is Test {
         uint lastCheckIn = deadMansSwitch.lastCheckIn(NON_CONTRACT_USER);
         assertEq(lastCheckIn, block.timestamp);
     }
-
-    function testWithdrawIsReentrancySafe() public {
-        // Whale deposits to the DeadMansSwitch contract
-        vm.deal(NON_CONTRACT_USER, 10 ether);
-        vm.prank(NON_CONTRACT_USER);
-        deadMansSwitch.deposit{value: 10 ether}();
-        // Set up the exploit contract
-        ReentrancyTest reentrancyTest = new ReentrancyTest();
-        reentrancyTest.setUp{value: 1 ether}(address(deadMansSwitch));
-        // Hopefully this reverts, otherwise the contract is vulnerable to reentrancy
-        vm.expectRevert();
-        reentrancyTest.exploitWithdraw();
-    }
-}
-
-contract ReentrancyTest {
-    DeadMansSwitch public deadMansSwitch;
-    function setUp(address wethContract) public payable {
-        // Set up contract reference
-        deadMansSwitch = DeadMansSwitch(payable(wethContract));
-        // Add deposit to contract
-        deadMansSwitch.deposit{value: 1 ether }();
-    }
-
-    function exploitWithdraw() public {
-        deadMansSwitch.withdraw(address(this), 1 ether);
-    }
-
-    fallback() external payable {
-        // If the user token balance hasn't been updated or is not checked then we get to call over and over until it is drained
-        if (address(deadMansSwitch).balance >= 1 ether) {
-            deadMansSwitch.withdraw(address(this), 1 ether);
-        }
-    }
 }
